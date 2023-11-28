@@ -2,7 +2,7 @@
 
 export type FullName = {
   firstName: string;
-  lastName: string
+  lastName: string;
 };
 
 export type Address = {
