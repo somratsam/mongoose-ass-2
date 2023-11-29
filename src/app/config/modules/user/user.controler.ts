@@ -63,7 +63,7 @@ const updateUser = async (req: Request, res: Response) => {
 const deleteUser = async (req: Request, res: Response) => {
   try {
     const { userId } = req.params;
-  
+
     const result = await UserServices.deleteUserFromDb(userId);
     res.status(200).json({
       success: true,
@@ -75,10 +75,33 @@ const deleteUser = async (req: Request, res: Response) => {
   }
 };
 
+
+const addOrder = async (req: Request, res: Response) => {
+  try {
+    const { userId } = req.params;
+    const order = req.body; // Assuming your request body directly contains the order data
+    const result = await UserServices.addOrderToDb(userId, order);
+    res.status(200).json({
+      success: true,
+      message: "Order added successfully!",
+      data: result,
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+};
+
+
+
 export const UserControllers = {
   createUser,
   getAllUses,
   getSingleUser,
   updateUser,
-  deleteUser
+  deleteUser,
+  addOrder
 };
