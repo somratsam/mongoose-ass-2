@@ -32,24 +32,53 @@ const getAllUses = async (req: Request, res: Response) => {
   }
 };
 
-
-const getSingleUser = async (req:Request, res: Response)=>{
-    try{
-
-        const {userId} = req.params
-        const result = await UserServices.getSingleUserFromDb(userId);
-        res.status(200).json({
-            success: true,
+const getSingleUser = async (req: Request, res: Response) => {
+  try {
+    const { userId } = req.params;
+    const result = await UserServices.getSingleUserFromDb(userId);
+    res.status(200).json({
+      success: true,
       message: "Users fetched successfully!",
       data: result,
-        })
-    }catch(err){
-        console.log(err);
-    }
-}
+    });
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+const updateUser = async (req: Request, res: Response) => {
+  try {
+    const { userId } = req.params;
+    const user = req.body.user;
+    const result = await UserServices.updateUserToDb(userId, user);
+    res.status(200).json({
+      success: true,
+      message: "User updated successfully!",
+      data: result,
+    });
+  } catch (err) {
+    console.log(err);
+  }
+};
+const deleteUser = async (req: Request, res: Response) => {
+  try {
+    const { userId } = req.params;
+  
+    const result = await UserServices.deleteUserFromDb(userId);
+    res.status(200).json({
+      success: true,
+      message: "User deleted successfully!",
+      data: result,
+    });
+  } catch (err) {
+    console.log(err);
+  }
+};
 
 export const UserControllers = {
   createUser,
   getAllUses,
-  getSingleUser
+  getSingleUser,
+  updateUser,
+  deleteUser
 };
