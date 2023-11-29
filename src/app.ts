@@ -10,7 +10,7 @@ app.use(express.json());
 app.use(cors());
 
 
-app.use('/api/v1/users', UserRoutes)
+app.use('/api', UserRoutes)
 
 const getAController = (req: Request, res: Response) => {
   const a = 10;
