@@ -3,7 +3,7 @@ import { UserServices } from "./user.service";
 
 const createUser = async (req: Request, res: Response) => {
   try {
-    const user = req.body.user;
+    const user = req.body
     const result = await UserServices.createUserIntoDb(user);
     res.status(200).json({
       success: true,
@@ -49,7 +49,7 @@ const getSingleUser = async (req: Request, res: Response) => {
 const updateUser = async (req: Request, res: Response) => {
   try {
     const { userId } = req.params;
-    const user = req.body.user;
+    const user = req.body
     const result = await UserServices.updateUserToDb(userId, user);
     res.status(200).json({
       success: true,

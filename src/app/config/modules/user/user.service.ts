@@ -11,7 +11,7 @@ const getAllUsersFromDb = async () => {
   return result;
 };
 const getSingleUserFromDb = async (userId: string) => {
-  const result = await UserModel.findOne({ userId });
+  const result = await UserModel.findById( userId );
   return result;
 };
 
@@ -20,7 +20,7 @@ const updateUserToDb = async (userId: string, user: User) => {
   return result;
 };
 const deleteUserFromDb = async (userId: string) => {
-  const result = await UserModel.deleteOne({ userId });
+  const result = await UserModel.findByIdAndDelete(userId);
   return result;
 };
 const addOrderToDb = async (userId: string, order: Order) => {
