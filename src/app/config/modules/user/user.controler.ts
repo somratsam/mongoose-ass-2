@@ -1,20 +1,34 @@
 import { Request, Response } from "express";
 import { UserServices } from "./user.service";
+import userValidationSchema from "./userValidation";
 
 const createUser = async (req: Request, res: Response) => {
   try {
-    const user = req.body
-    const result = await UserServices.createUserIntoDb(user);
+    const user = req.body;
+
+    console.log("User Object:", user);
+
+    const zodParseData = userValidationSchema.parse(user);
+
+    const result = await UserServices.createUserIntoDb(zodParseData);
     res.status(200).json({
       success: true,
       message: "User created successfully!",
       data: result,
     });
-  } catch (err) {
+  } catch (err: any) {
     console.log(err);
-    res.status(500).json({
+    const statusCode = err.statusCode || 404;
+    const errorMessage = err.message || "Internal Server Error";
+    const errorDescription = err.description || "User Already Exists";
+
+    res.status(statusCode).json({
       success: false,
-      message: "Internal Server Error",
+      message: errorMessage,
+      error: {
+        code: statusCode,
+        description: errorDescription,
+      },
     });
   }
 };
@@ -49,7 +63,7 @@ const getSingleUser = async (req: Request, res: Response) => {
 const updateUser = async (req: Request, res: Response) => {
   try {
     const { userId } = req.params;
-    const user = req.body
+    const user = req.body;
     const result = await UserServices.updateUserToDb(userId, user);
     res.status(200).json({
       success: true,
@@ -75,11 +89,10 @@ const deleteUser = async (req: Request, res: Response) => {
   }
 };
 
-
 const addOrder = async (req: Request, res: Response) => {
   try {
     const { userId } = req.params;
-    const order = req.body; // Assuming your request body directly contains the order data
+    const order = req.body;
     const result = await UserServices.addOrderToDb(userId, order);
     res.status(200).json({
       success: true,
@@ -95,13 +108,11 @@ const addOrder = async (req: Request, res: Response) => {
   }
 };
 
-
-
 export const UserControllers = {
   createUser,
   getAllUses,
   getSingleUser,
   updateUser,
   deleteUser,
-  addOrder
+  addOrder,
 };

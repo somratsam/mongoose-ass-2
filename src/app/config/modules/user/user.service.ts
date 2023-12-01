@@ -1,30 +1,38 @@
-import { UserModel } from "../user.model";
-import { Order, User } from "./user.interface";
+import { User } from "../user.model";
+import { TOrder, TUser } from "./user.interface";
 
-const createUserIntoDb = async (user: User) => {
-  const result = await UserModel.create(user);
+const createUserIntoDb = async (userData: TUser) => {
+  const user = new User(userData);
+
+  if (await user.isUserExists(userData.userId)) {
+    throw new Error("User Already Exists!");
+  }
+
+  const result = await user.save();
   return result;
 };
 
 const getAllUsersFromDb = async () => {
-  const result = await UserModel.find();
+  const result = await User.find().select(
+    "username fullName age email address"
+  );
   return result;
 };
-const getSingleUserFromDb = async (userId: string) => {
-  const result = await UserModel.findById( userId );
+const getSingleUserFromDb = async (_id: string) => {
+  const result = await User.findOne({ _id });
   return result;
 };
 
-const updateUserToDb = async (userId: string, user: User) => {
-  const result = await UserModel.findByIdAndUpdate(userId, user, { new: true });
+const updateUserToDb = async (userId: string, user: TUser) => {
+  const result = await User.findByIdAndUpdate(userId, user, { new: true });
   return result;
 };
 const deleteUserFromDb = async (userId: string) => {
-  const result = await UserModel.findByIdAndDelete(userId);
+  const result = await User.findByIdAndDelete(userId);
   return result;
 };
-const addOrderToDb = async (userId: string, order: Order) => {
-  const result = await UserModel.updateOne(
+const addOrderToDb = async (userId: string, order: TOrder) => {
+  const result = await User.updateOne(
     { _id: userId },
     { $push: { orders: order } },
     { new: true }
@@ -38,5 +46,5 @@ export const UserServices = {
   getSingleUserFromDb,
   updateUserToDb,
   deleteUserFromDb,
-  addOrderToDb
+  addOrderToDb,
 };
