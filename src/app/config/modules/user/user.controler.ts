@@ -6,8 +6,6 @@ const createUser = async (req: Request, res: Response) => {
   try {
     const user = req.body;
 
-    console.log("User Object:", user);
-
     const zodParseData = userValidationSchema.parse(user);
 
     const result = await UserServices.createUserIntoDb(zodParseData);
@@ -17,7 +15,6 @@ const createUser = async (req: Request, res: Response) => {
       data: result,
     });
   } catch (err: any) {
-    console.log(err);
     const statusCode = err.statusCode || 404;
     const errorMessage = err.message || "Internal Server Error";
     const errorDescription = err.description || "User Already Exists";
@@ -33,7 +30,7 @@ const createUser = async (req: Request, res: Response) => {
   }
 };
 
-const getAllUses = async (req: Request, res: Response) => {
+const getAllUsers = async (req: Request, res: Response) => {
   try {
     const result = await UserServices.getAllUsersFromDb();
     res.status(200).json({
@@ -41,8 +38,19 @@ const getAllUses = async (req: Request, res: Response) => {
       message: "Users fetched successfully!",
       data: result,
     });
-  } catch (err) {
-    console.log(err);
+  } catch (err: any) {
+    const statusCode = err.statusCode || 404;
+    const errorMessage = err.message || "Internal Server Error";
+    const errorDescription = err.description || "Users not found!";
+
+    res.status(statusCode).json({
+      success: false,
+      message: errorMessage,
+      error: {
+        code: statusCode,
+        description: errorDescription,
+      },
+    });
   }
 };
 
@@ -55,8 +63,19 @@ const getSingleUser = async (req: Request, res: Response) => {
       message: "Users fetched successfully!",
       data: result,
     });
-  } catch (err) {
-    console.log(err);
+  } catch (err: any) {
+    const statusCode = err.statusCode || 404;
+    const errorMessage = err.message || "Internal Server Error";
+    const errorDescription = err.description || "User not found!";
+
+    res.status(statusCode).json({
+      success: false,
+      message: errorMessage,
+      error: {
+        code: statusCode,
+        description: errorDescription,
+      },
+    });
   }
 };
 
@@ -70,8 +89,19 @@ const updateUser = async (req: Request, res: Response) => {
       message: "User updated successfully!",
       data: result,
     });
-  } catch (err) {
-    console.log(err);
+  } catch (err: any) {
+    const statusCode = err.statusCode || 404;
+    const errorMessage = err.message || "Internal Server Error";
+    const errorDescription = err.description || "User Already Exists";
+
+    res.status(statusCode).json({
+      success: false,
+      message: errorMessage,
+      error: {
+        code: statusCode,
+        description: errorDescription,
+      },
+    });
   }
 };
 const deleteUser = async (req: Request, res: Response) => {
@@ -84,8 +114,19 @@ const deleteUser = async (req: Request, res: Response) => {
       message: "User deleted successfully!",
       data: result,
     });
-  } catch (err) {
-    console.log(err);
+  } catch (err: any) {
+    const statusCode = err.statusCode || 404;
+    const errorMessage = err.message || "Internal Server Error";
+    const errorDescription = err.description || "User not found!";
+
+    res.status(statusCode).json({
+      success: false,
+      message: errorMessage,
+      error: {
+        code: statusCode,
+        description: errorDescription,
+      },
+    });
   }
 };
 
@@ -99,20 +140,81 @@ const addOrder = async (req: Request, res: Response) => {
       message: "Order added successfully!",
       data: result,
     });
-  } catch (err) {
-    console.log(err);
-    res.status(500).json({
+  } catch (err: any) {
+    const statusCode = err.statusCode || 404;
+    const errorMessage = err.message || "Internal Server Error";
+    const errorDescription = err.description || "User not found!";
+
+    res.status(statusCode).json({
       success: false,
-      message: "Internal Server Error",
+      message: errorMessage,
+      error: {
+        code: statusCode,
+        description: errorDescription,
+      },
+    });
+  }
+};
+
+const getSingleUserWithOrders = async (req: Request, res: Response) => {
+  try {
+    const result = await UserServices.getSingleUserWithOrdersFromDb();
+    res.status(200).json({
+      success: true,
+      message: "Order fetched successfully!",
+      data: result,
+    });
+  } catch (err: any) {
+    const statusCode = err.statusCode || 404;
+    const errorMessage = err.message || "Internal Server Error";
+    const errorDescription = err.description || "User not found!";
+
+    res.status(statusCode).json({
+      success: false,
+      message: errorMessage,
+      error: {
+        code: statusCode,
+        description: errorDescription,
+      },
+    });
+  }
+};
+
+const getTotalPrice = async (req: Request, res: Response) => {
+  try {
+    const { userId } = req.params;
+    const totalPrice = await UserServices.getTotalPriceForUserFromDb(userId);
+
+    res.status(200).json({
+      success: true,
+      message: "Total price calculated successfully!",
+      data: {
+        totalPrice: totalPrice,
+      },
+    });
+  } catch (err: any) {
+    const statusCode = err.statusCode || 404;
+    const errorMessage = err.message || "Internal Server Error";
+    const errorDescription = err.description || "User not found";
+
+    res.status(statusCode).json({
+      success: false,
+      message: errorMessage,
+      error: {
+        code: statusCode,
+        description: errorDescription,
+      },
     });
   }
 };
 
 export const UserControllers = {
   createUser,
-  getAllUses,
+  getAllUsers,
   getSingleUser,
   updateUser,
   deleteUser,
   addOrder,
+  getSingleUserWithOrders,
+  getTotalPrice,
 };

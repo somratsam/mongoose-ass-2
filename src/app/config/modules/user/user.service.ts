@@ -31,13 +31,49 @@ const deleteUserFromDb = async (userId: string) => {
   const result = await User.findByIdAndDelete(userId);
   return result;
 };
+
 const addOrderToDb = async (userId: string, order: TOrder) => {
-  const result = await User.updateOne(
-    { _id: userId },
-    { $push: { orders: order } },
-    { new: true }
+  const userA = await User.findById(userId);
+
+  if (userA) {
+    const result = await User.updateOne(
+      { _id: userId },
+      { $push: { orders: order } },
+      { new: true }
+    );
+
+    return result;
+  } else {
+    const newUser = new User({
+      _id: userId,
+      orders: [order],
+    });
+
+    const result = await newUser.save();
+
+    return result;
+  }
+};
+
+
+const getSingleUserWithOrdersFromDb = async () => {
+  const result = await User.find().select(
+    "orders"
   );
   return result;
+};
+
+const getTotalPriceForUserFromDb = async (userId: string) => {
+  const user = await User.findById(userId).select("orders");
+
+  if (!user) {
+    throw new Error("User not found!");
+  }
+
+  
+  const totalPrice = user.orders.reduce((sum, order) => sum + order.price, 0);
+
+  return totalPrice;
 };
 
 export const UserServices = {
@@ -47,4 +83,6 @@ export const UserServices = {
   updateUserToDb,
   deleteUserFromDb,
   addOrderToDb,
+  getSingleUserWithOrdersFromDb,
+  getTotalPriceForUserFromDb
 };

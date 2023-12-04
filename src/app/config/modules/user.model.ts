@@ -7,6 +7,8 @@ import {
   UserMethods,
   UserModel,
 } from "./user/user.interface";
+import bcrypt from "bcrypt";
+import config from "..";
 
 const FullNameSchema = new Schema<TFullName>({
   firstName: { type: String, required: true },
@@ -35,7 +37,22 @@ const userSchema = new Schema<TUser, UserModel, UserMethods>({
   isActive: { type: Boolean },
   hobbies: [String],
   address: AddressSchema,
-  orders: { type: [OrderSchema], default: undefined },
+  orders: { type: [OrderSchema], default: [] },
+});
+
+userSchema.pre("save", async function (next) {
+  // eslint-disable-next-line @typescript-eslint/no-this-alias
+  const user = this;
+  user.password = await bcrypt.hash(
+    user.password,
+    Number(config.bcrypt_salt_rounds)
+  );
+  next();
+});
+
+userSchema.post("save", function (doc, next) {
+  doc.password = "";
+  next();
 });
 
 userSchema.methods.isUserExists = async function (userId: number) {
