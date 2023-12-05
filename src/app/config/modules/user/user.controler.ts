@@ -92,7 +92,7 @@ const updateUser = async (req: Request, res: Response) => {
   } catch (err: any) {
     const statusCode = err.statusCode || 404;
     const errorMessage = err.message || "Internal Server Error";
-    const errorDescription = err.description || "User Already Exists";
+    const errorDescription = err.description || "Failed to update user";
 
     res.status(statusCode).json({
       success: false,
