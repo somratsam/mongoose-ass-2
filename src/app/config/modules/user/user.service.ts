@@ -18,26 +18,30 @@ const getAllUsersFromDb = async () => {
   );
   return result;
 };
-const getSingleUserFromDb = async (_id: string) => {
-  const result = await User.findOne({ _id });
+const getSingleUserFromDb = async (userId: number) => {
+  const result = await User.findOne({ userId }).select("-password -orders");
   return result;
 };
 
-const updateUserToDb = async (userId: string, user: TUser) => {
-  const result = await User.findByIdAndUpdate(userId, user, { new: true });
-  return result;
-};
-const deleteUserFromDb = async (userId: string) => {
-  const result = await User.findByIdAndDelete(userId);
+const updateUserToDb = async (userId: number, user: TUser) => {
+  const result = await User.findOneAndUpdate({ userId: userId }, user, {
+    new: true,
+    fields: { password: 0 },
+  });
   return result;
 };
 
-const addOrderToDb = async (userId: string, order: TOrder) => {
-  const userA = await User.findById(userId);
+const deleteUserFromDb = async (userId: number) => {
+  const result = await User.findOneAndDelete({ userId: userId });
+  return result;
+};
+
+const addOrderToDb = async (userId: number, order: TOrder) => {
+  const userA = await User.findOne({ userId: userId });
 
   if (userA) {
-    const result = await User.updateOne(
-      { _id: userId },
+    const result = await User.findOneAndUpdate(
+      { userId: userId },
       { $push: { orders: order } },
       { new: true }
     );
@@ -45,7 +49,7 @@ const addOrderToDb = async (userId: string, order: TOrder) => {
     return result;
   } else {
     const newUser = new User({
-      _id: userId,
+      userId: userId,
       orders: [order],
     });
 
@@ -55,23 +59,21 @@ const addOrderToDb = async (userId: string, order: TOrder) => {
   }
 };
 
-
-const getSingleUserWithOrdersFromDb = async () => {
-  const result = await User.find().select(
-    "orders"
-  );
+const getSingleUserWithOrdersFromDb = async (userId: number) => {
+  const result = await User.findOne({ userId: userId }).select("orders");
   return result;
 };
 
-const getTotalPriceForUserFromDb = async (userId: string) => {
-  const user = await User.findById(userId).select("orders");
+const getTotalPriceForUserFromDb = async (userId: number) => {
+  const user = await User.findOne({ userId: userId }).select("orders");
 
   if (!user) {
     throw new Error("User not found!");
   }
 
-  
-  const totalPrice = user.orders.reduce((sum, order) => sum + order.price, 0);
+  const totalPrice = user.orders.reduce((sum, order) => {
+    return order.price ? sum + order.price : sum;
+  }, 0);
 
   return totalPrice;
 };
@@ -84,5 +86,5 @@ export const UserServices = {
   deleteUserFromDb,
   addOrderToDb,
   getSingleUserWithOrdersFromDb,
-  getTotalPriceForUserFromDb
+  getTotalPriceForUserFromDb,
 };

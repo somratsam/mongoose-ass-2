@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { UserServices } from "./user.service";
 import userValidationSchema from "./userValidation";
+import { number } from "zod";
 
 const createUser = async (req: Request, res: Response) => {
   try {
@@ -57,16 +58,28 @@ const getAllUsers = async (req: Request, res: Response) => {
 const getSingleUser = async (req: Request, res: Response) => {
   try {
     const { userId } = req.params;
-    const result = await UserServices.getSingleUserFromDb(userId);
-    res.status(200).json({
-      success: true,
-      message: "Users fetched successfully!",
-      data: result,
-    });
+    const result = await UserServices.getSingleUserFromDb(Number(userId));
+
+    if (result) {
+      res.status(200).json({
+        success: true,
+        message: "User fetched successfully!",
+        data: result,
+      });
+    } else {
+      res.status(404).json({
+        success: false,
+        message: "User not found",
+        error: {
+          code: 404,
+          description: "User not found!",
+        },
+      });
+    }
   } catch (err: any) {
-    const statusCode = err.statusCode || 404;
+    const statusCode = err.statusCode || 500;
     const errorMessage = err.message || "Internal Server Error";
-    const errorDescription = err.description || "User not found!";
+    const errorDescription = err.description || "Failed to fetch user";
 
     res.status(statusCode).json({
       success: false,
@@ -83,7 +96,7 @@ const updateUser = async (req: Request, res: Response) => {
   try {
     const { userId } = req.params;
     const user = req.body;
-    const result = await UserServices.updateUserToDb(userId, user);
+    const result = await UserServices.updateUserToDb(Number(userId), user);
     res.status(200).json({
       success: true,
       message: "User updated successfully!",
@@ -108,7 +121,7 @@ const deleteUser = async (req: Request, res: Response) => {
   try {
     const { userId } = req.params;
 
-    const result = await UserServices.deleteUserFromDb(userId);
+    const result = await UserServices.deleteUserFromDb(Number(userId));
     res.status(200).json({
       success: true,
       message: "User deleted successfully!",
@@ -134,7 +147,7 @@ const addOrder = async (req: Request, res: Response) => {
   try {
     const { userId } = req.params;
     const order = req.body;
-    const result = await UserServices.addOrderToDb(userId, order);
+    const result = await UserServices.addOrderToDb(Number(userId), order);
     res.status(200).json({
       success: true,
       message: "Order added successfully!",
@@ -156,16 +169,31 @@ const addOrder = async (req: Request, res: Response) => {
   }
 };
 
-const getSingleUserWithOrders = async (req: Request, res: Response) => {
+const getSingleUserOrders = async (req: Request, res: Response) => {
   try {
-    const result = await UserServices.getSingleUserWithOrdersFromDb();
-    res.status(200).json({
-      success: true,
-      message: "Order fetched successfully!",
-      data: result,
-    });
+    const { userId } = req.params;
+    const result = await UserServices.getSingleUserWithOrdersFromDb(
+      Number(userId)
+    );
+
+    if (result) {
+      res.status(200).json({
+        success: true,
+        message: "User orders fetched successfully!",
+        data: result,
+      });
+    } else {
+      res.status(404).json({
+        success: false,
+        message: "User not found!",
+        error: {
+          code: 404,
+          description: "User not found!",
+        },
+      });
+    }
   } catch (err: any) {
-    const statusCode = err.statusCode || 404;
+    const statusCode = err.statusCode || 500;
     const errorMessage = err.message || "Internal Server Error";
     const errorDescription = err.description || "User not found!";
 
@@ -183,7 +211,9 @@ const getSingleUserWithOrders = async (req: Request, res: Response) => {
 const getTotalPrice = async (req: Request, res: Response) => {
   try {
     const { userId } = req.params;
-    const totalPrice = await UserServices.getTotalPriceForUserFromDb(userId);
+    const totalPrice = await UserServices.getTotalPriceForUserFromDb(
+      Number(userId)
+    );
 
     res.status(200).json({
       success: true,
@@ -215,6 +245,6 @@ export const UserControllers = {
   updateUser,
   deleteUser,
   addOrder,
-  getSingleUserWithOrders,
+  getSingleUserOrders,
   getTotalPrice,
 };
